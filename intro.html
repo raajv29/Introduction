@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Student Introduction Generator</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    padding: 20px;
+    margin: 0;
+  }
+  .container {
+    max-width: 600px;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+  h2 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .template-card {
+    background: #fafafa;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 15px;
+    cursor: pointer;
+    width: 100%;
+    box-sizing: border-box;
+    white-space: pre-wrap;
+    font-size: 1rem;
+    line-height: 1.4;
+    position: relative;
+  }
+  .template-card.selected {
+    border-color: #4285f4;
+    background-color: #e3f0ff;
+  }
+  .form-container {
+    display: none;
+    background: #e8f0fe;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 10px;
+  }
+  label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+  }
+  input {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+  button {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #4285f4;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 16px;
+  }
+  #output {
+    margin-top: 20px;
+    white-space: pre-wrap;
+    background: #dbe9ff;
+    padding: 15px;
+    border-radius: 10px;
+    min-height: 80px;
+  }
+  #copyBtn {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #34a853;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 16px;
+    display: none;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h2>Student Introduction Generator</h2>
+  <label>Select a Template:</label>
+  <div id="templateCards"></div>
+  <div id="output"></div>
+  <button id="copyBtn" onclick="copyText()">Copy Introduction</button>
+</div>
+<script>
+const templates = [
+  {
+    id: 1,
+    text: `Good Morning Sir/Madam
+
+First and foremost I wanted to thank you for giving me this opportunity to work with your reputable organization.
+
+My name is [Name]
+
+I completed my degree in [Degree] from [College/University].
+
+My interest has always been in reading
+
+I am from [Location]
+
+There are [FamilyCount] people in my family
+
+My father is a [FatherJob]
+
+My Mother is a [MotherJob]
+
+I have a [SisterCount] sister & [BrotherCount] Brother.
+
+I want to become a [Career]
+
+Thank you`,
+    fields: ['Name', 'Degree', 'College/University', 'Location', 'FamilyCount', 'FatherJob', 'MotherJob', 'SisterCount', 'BrotherCount', 'Career']
+  },
+  {
+    id: 2,
+    text: `Good Morning Sir/Madam,
+
+Thank you for giving me this opportunity,
+
+My name is [Name]
+
+I am originally from [Origin] but I currently live in [CurrentLocation]
+
+I completed my major in [Major] From [University]
+
+I like to read books and listen to music in my free time.
+
+my strengths are that I adapt quickly to new environments and creative
+
+About my family:
+
+There are [FamilyCount] people in my family
+
+My father is a [FatherType]. He is a [FatherJob]
+
+My Mother is a [MotherType]. She is a [MotherJob]
+
+My goal for the future is to be in a [Career] in my field of work.
+
+Thanks again for giving me this opportunity.`,
+    fields: ['Name', 'Origin', 'CurrentLocation', 'Major', 'University', 'FamilyCount', 'FatherType', 'FatherJob', 'MotherType', 'MotherJob', 'Career']
+  },
+  {
+    id: 3,
+    text: `Good morning Sir/Madam,
+
+Thank you for giving me the opportunity to introduce myself.
+
+My name is [Name]. I come from [Origin], and I’m currently living in [CurrentLocation].
+I hold a degree in [Degree], which I completed from [University].
+
+My key strengths are adaptability and creativity—
+
+A little about my family:
+We are [FamilyCount] members in total. My father is a [FatherType], and he works as a [FatherJob].
+My mother is a [MotherType], and she works as a [MotherJob].
+
+Looking ahead, my goal is to grow professionally as a [Career] and contribute meaningfully in my field.
+
+Once again, thank you for this opportunity.`,
+    fields: ['Name', 'Origin', 'CurrentLocation', 'Degree', 'University', 'FamilyCount', 'FatherType', 'FatherJob', 'MotherType', 'MotherJob', 'Career']
+  },
+  {
+    id: 4,
+    text: `Good Morning Sir/Madam,
+
+First of all, thank you for giving me this opportunity to introduce myself.
+
+My name is [Name].
+
+I completed my degree in [Degree] from [College/University].
+
+During my studies, I learned many useful skills like teamwork, communication, and time management.
+
+I enjoy reading books in my free time. It helps me relax and learn new things.
+
+I am from [Location].
+
+There are [FamilyCount] people in my family.
+
+My father is a [FatherJob].
+
+My mother is a [MotherJob].
+
+I have [SisterCount] sister(s) and [BrotherCount] brother(s).
+
+I am a hardworking, honest, and friendly person.
+
+My goal is to become a successful [Career].
+
+Thank you again for this chance.`,
+    fields: ['Name', 'Degree', 'College/University', 'Location', 'FamilyCount', 'FatherJob', 'MotherJob', 'SisterCount', 'BrotherCount', 'Career']
+  },
+  {
+    id: 5,
+    text: `Good Morning Sir/Ma'am,
+
+First of all, thank you for giving me this opportunity to introduce myself.
+
+My name is [Name].
+I have completed my higher education from [Institution].
+I also have basic knowledge of computers.
+
+There are 4 members in my family, including me.
+My father’s name is [FatherName]. He is a [FatherJob].
+My mother’s name is [MotherName]. She is a [MotherJob].
+I have one [SiblingType]. His/Her name is [SiblingName], and he/she is a [SiblingJob].
+
+My strength is that I am a hard-working and dedicated person.
+My weakness is that I tend to trust people easily, but I am learning to be more careful.
+
+My hobbies are exercising, playing sports, and listening to music.
+I am a self-motivated person.
+
+Thank you once again for this opportunity.`,
+    fields: ['Name', 'Institution', 'FatherName', 'FatherJob', 'MotherName', 'MotherJob', 'SiblingType', 'SiblingName', 'SiblingJob']
+  },
+  {
+    id: 6,
+    text: `Good morning Sir/Madam,
+
+Thank you for giving me this opportunity to introduce myself.
+
+My name is [Name], and I am from [Location].
+
+I have completed my qualification in [Qualification] from [Institution].
+
+There are four members in my family.
+
+My father is a [FatherJob], my mother is a [MotherJob], and I have one younger sister who is currently looking for job opportunities.
+
+My hobbies include playing badminton and drawing.
+
+My strengths are that I am a quick learner and responsible.
+
+My short-term goal is to get a job.
+
+My long-term goal is to achieve a higher position and make my family proud.
+
+Thank you once again for this opportunity.`,
+    fields: ['Name', 'Location', 'Qualification', 'Institution', 'FatherJob', 'MotherJob']
+  }
+];
+
+const cardContainer = document.getElementById('templateCards');
+
+function createCard(tpl) {
+  const card = document.createElement('div');
+  card.className = 'template-card';
+  card.innerHTML = `<strong>Template ${tpl.id}</strong><br><br>${tpl.text}`;
+  card.onclick = () => selectTemplate(tpl);
+
+  const form = document.createElement('form');
+  form.className = 'form-container';
+  form.onsubmit = e => {
+    e.preventDefault();
+    generateIntro(tpl);
+  };
+  form.id = `form${tpl.id}`;
+
+  tpl.fields.forEach(field => {
+    const label = document.createElement('label');
+    label.innerText = `Enter ${field.replace(/([A-Z])/g, ' $1')}:`;
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.id = `${field}${tpl.id}`;
+    input.required = false;
+    form.appendChild(label);
+    form.appendChild(input);
+  });
+
+  const btn = document.createElement('button');
+  btn.type = 'submit';
+  btn.innerText = 'Generate Introduction';
+  form.appendChild(btn);
+
+  card.appendChild(form);
+  cardContainer.appendChild(card);
+}
+
+let activeForm = null;
+
+function selectTemplate(tpl) {
+  document.querySelectorAll('.template-card').forEach(card => card.classList.remove('selected'));
+  const form = document.getElementById(`form${tpl.id}`);
+  if (activeForm && activeForm !== form) {
+    activeForm.style.display = 'none';
+  }
+  const card = form.closest('.template-card');
+  card.classList.add('selected');
+  form.style.display = form.style.display === 'block' ? 'none' : 'block';
+  activeForm = form.style.display === 'block' ? form : null;
+  document.getElementById('output').textContent = '';
+  document.getElementById('copyBtn').style.display = 'none';
+}
+
+function generateIntro(tpl) {
+  let intro = tpl.text;
+  tpl.fields.forEach(field => {
+    const value = document.getElementById(`${field}${tpl.id}`).value.trim() || `[${field}]`;
+    const regex = new RegExp(`\\[${field}\\]`, 'g');
+    intro = intro.replace(regex, value);
+  });
+  document.getElementById('output').textContent = intro;
+  document.getElementById('copyBtn').style.display = 'block';
+}
+
+function copyText() {
+  const output = document.getElementById('output').textContent;
+  navigator.clipboard.writeText(output).then(() => {
+    alert('Introduction copied to clipboard!');
+  });
+}
+
+templates.forEach(createCard);
+</script>
+</body>
+</html>
