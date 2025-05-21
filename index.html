@@ -12,12 +12,8 @@
     margin: 0;
   }
   .container {
-    max-width: 600px;
+    max-width: 700px;
     margin: auto;
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
   }
   h2 {
     text-align: center;
@@ -27,22 +23,27 @@
     background: #fafafa;
     border: 2px solid #ccc;
     border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 15px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
     cursor: pointer;
-    width: 100%;
-    box-sizing: border-box;
-    white-space: pre-wrap;
-    font-size: 1rem;
-    line-height: 1.4;
+    transition: border-color 0.3s;
     position: relative;
   }
   .template-card.selected {
     border-color: #4285f4;
     background-color: #e3f0ff;
   }
+  .template-text {
+    white-space: pre-wrap;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    margin-bottom: 10px;
+    background: #fff;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+  }
   .form-container {
-    display: none;
     background: #e8f0fe;
     padding: 15px;
     border-radius: 8px;
@@ -55,12 +56,13 @@
   }
   input {
     width: 100%;
-    padding: 8px;
+    padding: 7px;
     margin-top: 5px;
     border-radius: 5px;
     border: 1px solid #ccc;
+    font-size: 1rem;
   }
-  button {
+  button.generate-btn {
     margin-top: 15px;
     padding: 10px;
     background-color: #4285f4;
@@ -71,15 +73,16 @@
     width: 100%;
     font-size: 16px;
   }
-  #output {
+  .output-container {
     margin-top: 20px;
-    white-space: pre-wrap;
     background: #dbe9ff;
     padding: 15px;
     border-radius: 10px;
     min-height: 80px;
+    white-space: pre-wrap;
+    font-size: 1rem;
   }
-  #copyBtn {
+  button.copy-btn {
     margin-top: 10px;
     padding: 10px;
     background-color: #34a853;
@@ -96,11 +99,11 @@
 <body>
 <div class="container">
   <h2>Student Introduction Generator</h2>
-  <label>Select a Template:</label>
+
   <div id="templateCards"></div>
-  <div id="output"></div>
-  <button id="copyBtn" onclick="copyText()">Copy Introduction</button>
+
 </div>
+
 <script>
 const templates = [
   {
@@ -261,77 +264,118 @@ Thank you once again for this opportunity.`,
   }
 ];
 
-const cardContainer = document.getElementById('templateCards');
+const container = document.getElementById('templateCards');
 
-function createCard(tpl) {
-  const card = document.createElement('div');
-  card.className = 'template-card';
-  card.innerHTML = `<strong>Template ${tpl.id}</strong><br><br>${tpl.text}`;
-  card.onclick = () => selectTemplate(tpl);
+let selectedTemplateId = null;
 
-  const form = document.createElement('form');
-  form.className = 'form-container';
-  form.onsubmit = e => {
-    e.preventDefault();
-    generateIntro(tpl);
-  };
-  form.id = `form${tpl.id}`;
+function renderTemplates() {
+  container.innerHTML = '';
 
-  tpl.fields.forEach(field => {
-    const label = document.createElement('label');
-    label.innerText = `Enter ${field.replace(/([A-Z])/g, ' $1')}:`;
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.id = `${field}${tpl.id}`;
-    input.required = false;
-    form.appendChild(label);
-    form.appendChild(input);
+  templates.forEach(tpl => {
+    const card = document.createElement('div');
+    card.className = 'template-card';
+    if(tpl.id === selectedTemplateId) card.classList.add('selected');
+
+    // Title
+    const title = document.createElement('strong');
+    title.textContent = `Template ${tpl.id}`;
+    title.style.fontSize = '1.2rem';
+    title.style.display = 'block';
+    title.style.marginBottom = '10px';
+    card.appendChild(title);
+
+    // Template text (always visible)
+    const tplText = document.createElement('pre');
+    tplText.className = 'template-text';
+    tplText.textContent = tpl.text;
+    card.appendChild(tplText);
+
+    // On click on whole card to select/deselect
+    card.onclick = (e) => {
+      // Prevent click event on inputs and buttons inside form toggling selection
+      if(e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.tagName === 'LABEL') return;
+
+      if(selectedTemplateId === tpl.id) {
+        selectedTemplateId = null;
+      } else {
+        selectedTemplateId = tpl.id;
+      }
+      renderTemplates();
+    }
+
+    // If selected, show form + output + copy button
+    if(tpl.id === selectedTemplateId) {
+      const form = document.createElement('form');
+      form.className = 'form-container';
+
+      tpl.fields.forEach(field => {
+        const label = document.createElement('label');
+        const readableField = field.replace(/([A-Z])/g, ' $1').trim();
+        label.textContent = `Enter ${readableField}:`;
+        label.htmlFor = field + '_'+tpl.id;
+        form.appendChild(label);
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.name = field;
+        input.id = field + '_'+tpl.id;
+        input.required = true;
+        form.appendChild(input);
+      });
+
+      const generateBtn = document.createElement('button');
+      generateBtn.type = 'submit';
+      generateBtn.className = 'generate-btn';
+      generateBtn.textContent = 'Generate Introduction';
+      form.appendChild(generateBtn);
+
+      card.appendChild(form);
+
+      const outputContainer = document.createElement('div');
+      outputContainer.className = 'output-container';
+      outputContainer.id = 'output_' + tpl.id;
+      card.appendChild(outputContainer);
+
+      const copyBtn = document.createElement('button');
+      copyBtn.type = 'button';
+      copyBtn.className = 'copy-btn';
+      copyBtn.textContent = 'Copy Introduction';
+      copyBtn.style.display = 'none';
+      card.appendChild(copyBtn);
+
+      form.addEventListener('submit', e => {
+        e.preventDefault();
+
+        let intro = tpl.text;
+        tpl.fields.forEach(field => {
+          const val = form[field].value.trim() || `[${field}]`;
+          const regex = new RegExp(`\\[${field}\\]`, 'g');
+          intro = intro.replace(regex, val);
+        });
+
+        outputContainer.textContent = intro;
+        copyBtn.style.display = 'block';
+      });
+
+      copyBtn.addEventListener('click', () => {
+        const text = outputContainer.textContent;
+        if(!text) {
+          alert('Nothing to copy!');
+          return;
+        }
+        navigator.clipboard.writeText(text).then(() => {
+          alert('Introduction copied to clipboard!');
+        }).catch(() => {
+          alert('Copy failed, please copy manually.');
+        });
+      });
+    }
+
+    container.appendChild(card);
   });
-
-  const btn = document.createElement('button');
-  btn.type = 'submit';
-  btn.innerText = 'Generate Introduction';
-  form.appendChild(btn);
-
-  card.appendChild(form);
-  cardContainer.appendChild(card);
 }
 
-let activeForm = null;
-
-function selectTemplate(tpl) {
-  document.querySelectorAll('.template-card').forEach(card => card.classList.remove('selected'));
-  const form = document.getElementById(`form${tpl.id}`);
-  if (activeForm && activeForm !== form) {
-    activeForm.style.display = 'none';
-  }
-  const card = form.closest('.template-card');
-  card.classList.add('selected');
-  form.style.display = form.style.display === 'block' ? 'none' : 'block';
-  activeForm = form.style.display === 'block' ? form : null;
-  document.getElementById('output').textContent = '';
-  document.getElementById('copyBtn').style.display = 'none';
-}
-
-function generateIntro(tpl) {
-  let intro = tpl.text;
-  tpl.fields.forEach(field => {
-    const value = document.getElementById(`${field}${tpl.id}`).value.trim() || `[${field}]`;
-    const regex = new RegExp(`\\[${field}\\]`, 'g');
-    intro = intro.replace(regex, value);
-  });
-  document.getElementById('output').textContent = intro;
-  document.getElementById('copyBtn').style.display = 'block';
-}
-
-function copyText() {
-  const output = document.getElementById('output').textContent;
-  navigator.clipboard.writeText(output).then(() => {
-    alert('Introduction copied to clipboard!');
-  });
-}
-
-templates.forEach(createCard);
+renderTemplates();
 </script>
 </body>
 </html>
